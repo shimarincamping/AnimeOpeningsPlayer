@@ -8,26 +8,6 @@ def alphnum(original_string):
 
 def playsong(searchresults, selectedaudio, songlist):
 
-    # print("""
-    # [#{}] NOW PLAYING '{}'
-    # ==================================
-    # ANNID ---- {}
-    # Anime ---- {}
-    # Type ---- {}
-    # Song Name ---- {}
-    # Artist ---- {}
-    # Vintage ---- {} ({})
-    # Difficulty --- {}%
-    # """.format(searchresults[selectedaudio][0], 
-    #            searchresults[selectedaudio][-10] + ".mp3", 
-    #            searchresults[selectedaudio][1], 
-    #            searchresults[selectedaudio][2], 
-    #            searchresults[selectedaudio][7], 
-    #            searchresults[selectedaudio][5], 
-    #            searchresults[selectedaudio][6], 
-    #            searchresults[selectedaudio][8], 
-    #            searchresults[selectedaudio][9], 
-    #            searchresults[selectedaudio][4])) 
     sample = random.randint(1, 90)
 
     print("\n\n||| Exit the file with 'Q' when you are ready to guess.")
@@ -50,6 +30,12 @@ def playsong(searchresults, selectedaudio, songlist):
                     print(" _ ", end="")
 
             print("\n\n")
+            continue
+        elif raw_query.upper().strip() in ["/SONGNAME", "/SN"]:
+            print("\n\nSONG NAME HINT: {}\n\n".format(searchresults[selectedaudio][5]))
+            continue
+        elif raw_query.upper().strip() in ["/ARTIST", "/A", "/WHO"]:
+            print("\n\nARTIST HINT: {}\n\n".format(searchresults[selectedaudio][6]))
             continue
         elif raw_query.upper().strip() in ["/END", "/E"]:
             return [False, False]
