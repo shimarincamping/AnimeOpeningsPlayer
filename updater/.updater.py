@@ -65,6 +65,8 @@ if json_list:
                     discrepancy.append("   [!] Discrepancy found in entry #{} ({}) - genres: {} ----> {}".format(str(target_index+1).zfill(4), j[2],j[11], i[9]))
                 if j[18] != i[-5] and i[-5]:
                     discrepancy.append("   [!] Discrepancy found in entry #{} ({}) - mp3: {} ----> {}".format(str(target_index+1).zfill(4), j[2],j[18], i[-5]))
+                if j[20] != i[-3] and i[-3]:
+                    discrepancy.append("   [!] Discrepancy found in entry #{} ({}) - anilist: {} ----> {}".format(str(target_index+1).zfill(4), j[2],j[20], i[-3]))
                 found_match = True
                 checked_entries.append(target_index)
                 break
