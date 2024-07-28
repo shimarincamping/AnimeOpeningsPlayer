@@ -1,6 +1,7 @@
 import json 
 import os
 import time
+import ast
 
 # Json to Excel
 json_list = os.listdir("./jsonfiles/updatechecks")
@@ -53,7 +54,7 @@ if json_list:
                     discrepancy.append("   [!] Discrepancy found in entry #{} ({}) - song name: {} ----> {}".format(str(target_index+1).zfill(4), j[2],j[5], i[3]))
                 if j[6] != i[4] and i[4]:
                     discrepancy.append("   [!] Discrepancy found in entry #{} ({}) - artist: {} ----> {}".format(str(target_index+1).zfill(4), j[2],j[6], i[4]))
-                if set(j[-3]) != set(i[-1]):
+                if set(ast.literal_eval(j[-3])) != set(ast.literal_eval(i[-1])):
                     discrepancy.append("   [!] Discrepancy found in entry #{} ({}) - alt names: {} ----> {}".format(str(target_index+1).zfill(4), j[2],j[-3], i[-1]))
                 if j[8] != i[6]:
                     discrepancy.append("   [!] Discrepancy found in entry #{} ({}) - vintage: {} ----> {}".format(str(target_index+1).zfill(4), j[2],j[8], i[6]))
