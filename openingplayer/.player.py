@@ -41,7 +41,29 @@ def cmd_sanitise(original_string):
         original_string = original_string.replace(i, j)
     return original_string
 
-def playsong(searchresults, selectedaudio, playvideo=False):
+def get_mpv_title(id, anime_name):
+    return cmd_sanitise("[#{}] {}".format(id, anime_name))
+
+def get_window_title(id, anime_name, op_number, song_name, artist_name):
+    return cmd_sanitise("[#{}] {} OP{} - '{}' by {}".format(id, anime_name, op_number.split()[1], song_name, artist_name))
+
+def stream_mp3(selected_audio, loudnorm_I=-12, loudnorm_TP=-0.5):
+    os.system('cmd /c "mpv --force-window --no-border --force-media-title=^"{}^" --title=^"{}^" --af=loudnorm=I={}:TP={} --osd-playing-msg="\\n${{media-title}}" --osd-playing-msg-duration=3600000 --osd-font-size=30 --osd-level=2 --osd-fractions --loop-file=no {}"'.format(
+        get_mpv_title(selected_audio[0], selected_audio[2]),
+        get_window_title(selected_audio[0], selected_audio[2], selected_audio[7], selected_audio[5], selected_audio[6]),
+        loudnorm_I, loudnorm_TP,
+        selected_audio[-7].replace("ladist1.catbox.video", best_server)
+    ))
+
+def stream_webm(selected_audio, loudnorm_I=-12, loudnorm_TP=-0.5):
+    os.system('cmd /c "mpv --no-border --force-media-title=^"{}^" --title=^"{}^" --af=loudnorm=I={}:TP={} --osd-playing-msg="${{media-title}}" --osd-playing-msg-duration=3600000 --osd-font-size=30 --loop-file=no {}"'.format(
+        get_mpv_title(selected_audio[0], selected_audio[2]),
+        get_window_title(selected_audio[0], selected_audio[2], selected_audio[7], selected_audio[5], selected_audio[6]),
+        loudnorm_I, loudnorm_TP,
+        selected_audio[-8].replace("ladist1.catbox.video", best_server)
+    ))
+
+def play_song(selected_audio):
     print("""
     [#{}] NOW PLAYING '{}'
     ==================================
@@ -52,40 +74,32 @@ def playsong(searchresults, selectedaudio, playvideo=False):
     Artist ---- {}
     Vintage ---- {} ({})
     Difficulty --- {}%
-    """.format(searchresults[selectedaudio][0], 
-               searchresults[selectedaudio][-10] + ".mp3" if not playvideo else searchresults[selectedaudio][-11] + ".webm", 
-               searchresults[selectedaudio][1], 
-               searchresults[selectedaudio][2], 
-               searchresults[selectedaudio][7], 
-               searchresults[selectedaudio][5], 
-               searchresults[selectedaudio][6], 
-               searchresults[selectedaudio][8], 
-               searchresults[selectedaudio][9], 
-               searchresults[selectedaudio][4]))
+    """.format(selected_audio[0], 
+               selected_audio[-10] + ".mp3" if not play_video else selected_audio[-11] + ".webm", 
+               selected_audio[1], 
+               selected_audio[2], 
+               selected_audio[7], 
+               selected_audio[5], 
+               selected_audio[6], 
+               selected_audio[8], 
+               selected_audio[9], 
+               selected_audio[4]))
 
-    if not playvideo:
-        os.system('cmd /c "mpv --force-window --no-border --force-media-title=^"{}^" --title=^"{}^" --af=loudnorm=I=-12:TP=-0.5 --osd-playing-msg="\\n${{media-title}}" --osd-playing-msg-duration=3600000 --osd-font-size=30 --osd-level=2 --osd-fractions --loop-file=no {}"'.format(
-            cmd_sanitise("[#{}] {}".format(searchresults[selectedaudio][0], searchresults[selectedaudio][2])),
-            cmd_sanitise("[#{}] {} OP{} - '{}' by {}".format(searchresults[selectedaudio][0], searchresults[selectedaudio][2], searchresults[selectedaudio][7].split()[1], searchresults[selectedaudio][5], searchresults[selectedaudio][6])),
-            searchresults[selectedaudio][-7].replace("ladist1.catbox.video", best_server)
-            ))
+    if not play_video:
+        stream_mp3(selected_audio)
     else:
-        os.system('cmd /c "mpv --no-border --force-media-title=^"{}^" --title=^"{}^" --af=loudnorm=I=-12:TP=-0.5 --osd-playing-msg="${{media-title}}" --osd-playing-msg-duration=3600000 --osd-font-size=30 --loop-file=no {}"'.format(
-            cmd_sanitise("[#{}] {}".format(searchresults[selectedaudio][0], searchresults[selectedaudio][2])),
-            cmd_sanitise("[#{}] {} OP{} - '{}' by {}".format(searchresults[selectedaudio][0], searchresults[selectedaudio][2], searchresults[selectedaudio][7].split()[1], searchresults[selectedaudio][5], searchresults[selectedaudio][6])),
-            searchresults[selectedaudio][-8].replace("ladist1.catbox.video", best_server)
-            ))
+        stream_webm(selected_audio)
 
-def containschecker(entry, tocheck, index):
+def contains_checker(entry, tocheck, index):
     return all([i in [alphnum(x.lower()) for x in entry[index].split(", ")] for i in tocheck])
         
-def rangechecker(entry, tocheck, index):
+def range_checker(entry, tocheck, index):
     if isinstance(tocheck[0], str):
         return (tocheck[0] == 0.0) if entry[index] in ["Unrated", "N/A"] else (tocheck[0] <= entry[index] <= tocheck[1])
     else:
         return (tocheck[0] == 0.0) if entry[index] in ["Unrated", "N/A"] else (tocheck[0] <= float(entry[index]) <= tocheck[1])
 
-def takeFirst(elem):
+def take_first(elem):
     return int(elem[0])
 
 def get_playlists():
@@ -103,9 +117,9 @@ def main_init():
 
     print(">>> Initialising song list...")
     with open("000data.txt", encoding="utf-8") as songdb:
-        songlist = [r.split('\t') for r in songdb.read().split('\n')[1:]]
+        song_list = [r.split('\t') for r in songdb.read().split('\n')[1:]]
 
-    print(">>> Complete: loaded {} entries\n".format(str(len(songlist))))
+    print(">>> Complete: loaded {} entries\n".format(str(len(song_list))))
 
     print("""
     ====================
@@ -125,157 +139,168 @@ def main_init():
     best_server = check_connection() if input("||| Check server connections? (Y/N): ").strip().lower() == "y" else servers[0]
     print()
 
-    return songlist
+    return song_list
 
 
-def main(songlist):
+def get_search_results(query):
+    results = []
+    for i in song_list:
+        for j in [alphnum(x.lower()) for x in [i[2], i[3], i[5], i[6]] + ast.literal_eval(i[-3])]:
+            if query in j:
+                print("[{}] {} OP{} – \"{}\" by {}".format(len(results) + 1, i[2], i[7].split()[1], i[5], i[6]))
+                results.append(i)
+                break
+    return results
 
-    selectedmode = input("||| Enter 'S' (search mode), 'R' (random song), 'L' (random list), or 'P' (playlist)\n||| Add 'V' to the end to play video instead of audio: ").lower().strip()
-    playvideo = len(selectedmode) > 1 and selectedmode[1] == "v"
 
-    while True:    
-        if selectedmode[0] == "s":
-            query = alphnum(input("\n||| Search for an anime, song, or artist: ").lower())
+def begin_search_mode():
+    query = alphnum(input("\n||| Search for an anime, song, or artist: ").lower())
 
+    print("\n\nMatches found: \n")
+    results = get_search_results(query)
+
+    if len(results) == 0:
+        print("\nNo results.")
+        return
+    print("\nTotal results:", len(results))
+
+    try:
+        play_song(results[(int(input("\n||| Enter the corresponding number to play song: ")) - 1) % len(results)])
+    except:
+        return
+    
+
+def begin_random_mode():
+    print("\n\n>>> Picking a random song...")
+    play_song(random.choice(song_list))
+
+
+def get_filter_results(list_filter):
+    genre_filter = [alphnum(p) for p in list_filter.get("g").replace(" ", "").split(",")] if "g" in list_filter.keys() else []
+    type_filter = [alphnum(p) for p in list_filter.get("t").replace(" ", "").split(",")] if "t" in list_filter.keys() else []
+    studio_filter = [alphnum(p) for p in list_filter.get("st").replace(" ", "").split(",")] if "st" in list_filter.keys() else []
+    diff_range = [float(x) for x in sorted(list_filter.get("d").replace(" ", "").split(":"), key=float)] if "d" in list_filter.keys() else [0.0, 100.0]
+    vintage_range = sorted(list_filter.get("v").replace(" ", "").split(":")) if "v" in list_filter.keys() else ["1000-1", "9999-4"]
+    if "sc" in list_filter.keys():
+        score_range = [0.0, 0.0] if list_filter.get("sc") == "n/a" else [float(x) for x in sorted(list_filter.get("sc").replace(" ", "").split(":"), key=float)]
+    else:
+        score_range = [0.0, 10.0]
+
+
+    results = [i for i in song_list if all([
+            contains_checker(i, genre_filter, 11), 
+            contains_checker(i, type_filter, 9), 
+            contains_checker(i, studio_filter, 10), 
+            range_checker(i, diff_range, 4), 
+            range_checker(i, vintage_range, -2), 
+            range_checker(i, score_range, 12)])]
+    return results
+
+
+def begin_list_mode():
+    try:
+        list_filter = dict([l.lower().split(maxsplit=1) for l in input("""
+
+        ||| Enter filter command
+        ||| Syntax: list [number of songs] [flags]
+            ||| Genre flag: -g [genres to include, separated by commas]
+            ||| Type flag: -t [type]
+            ||| Studio flag: -st [studio]
+            ||| Difficulty flag: -d [lower bound:upper bound (inclusive)]
+            ||| Vintage flag: -v [loweryear-lowerseasonnumber:upperyear-upperseasonnumber (inclusive)]
+            ||| Score flag: -sc [lower bound:upper bound (inclusive)] or -sc N/A
+        
+        >>> """).strip().split(" -")])
+
+        results = get_filter_results(list_filter)
+
+        if len(results) < int(list_filter.get("list")):
+            output = sorted(results, key=take_first)
+        else:
+            random.shuffle(results)
+            output = results[0:int(list_filter.get("list"))]
+            output.sort(key=take_first)
+
+        if len(output) > 0:
+            count = 1
             print("\n\nMatches found: \n")
-            results = []
-
-            for i in songlist:
-                for j in [alphnum(x.lower()) for x in [i[2], i[3], i[5], i[6]] + ast.literal_eval(i[-3])]:
-                    if query in j:
-                        print("[{}] {} OP{} – \"{}\" by {}".format(len(results) + 1, i[2], i[7].split()[1], i[5], i[6]))
-                        results.append(i)
-                        break
-
-            if len(results) == 0:
-                print("\nNo results.")
-                continue
-            print("\nTotal results:", len(results))
+            for i in output:
+                print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7].split()[1], i[5], i[6]))
+                count += 1
 
             try:
-                playsong(results,(int(input("\n||| Enter the corresponding number to play song: ")) - 1) % len(results), playvideo=playvideo)
-            except:
-                continue
-
-        elif selectedmode[0] == "r":
-            print("\n\n>>> Picking a random song...")
-            playsong([random.choice(songlist)], 0, playvideo=playvideo)
-
-        elif selectedmode[0] == "l":
-            results = []
-            try:
-                listfilter = dict([l.lower().split(maxsplit=1) for l in input("""
-
-                ||| Enter filter command
-                ||| Syntax: list [number of songs] [flags]
-                    ||| Genre flag: -g [genres to include, separated by commas]
-                    ||| Type flag: -t [type]
-                    ||| Studio flag: -st [studio]
-                    ||| Difficulty flag: -d [lower bound:upper bound (inclusive)]
-                    ||| Vintage flag: -v [loweryear-lowerseasonnumber:upperyear-upperseasonnumber (inclusive)]
-                    ||| Score flag: -sc [lower bound:upper bound (inclusive)] or -sc N/A
-                
-                >>> """).strip().split(" -")])
-
-                genrefilter = [alphnum(p) for p in listfilter.get("g").replace(" ", "").split(",")] if "g" in listfilter.keys() else []
-                typefilter = [alphnum(p) for p in listfilter.get("t").replace(" ", "").split(",")] if "t" in listfilter.keys() else []
-                studiofilter = [alphnum(p) for p in listfilter.get("st").replace(" ", "").split(",")] if "st" in listfilter.keys() else []
-                diffrange = [float(x) for x in sorted(listfilter.get("d").replace(" ", "").split(":"), key=float)] if "d" in listfilter.keys() else [0.0, 100.0]
-                vintagerange = sorted(listfilter.get("v").replace(" ", "").split(":")) if "v" in listfilter.keys() else ["1000-1", "9999-4"]
-                if "sc" in listfilter.keys():
-                    if listfilter.get("sc") == "n/a":
-                        scorerange = [0.0, 0.0]
-                    else:
-                        scorerange = [float(x) for x in sorted(listfilter.get("sc").replace(" ", "").split(":"), key=float)]
-                else:
-                    scorerange = [0.0, 10.0]
-
-                for i in songlist:
-                    filtermatch = [
-                        containschecker(i, genrefilter, 11), 
-                        containschecker(i, typefilter, 9), 
-                        containschecker(i, studiofilter, 10), 
-                        rangechecker(i, diffrange, 4), 
-                        rangechecker(i, vintagerange, -2), 
-                        rangechecker(i, scorerange, 12)
-                    ]
-            
-                    if all(filtermatch):
-                        results.append(i)
-
-                if len(results) < int(listfilter.get("list")):
-                    output = sorted(results, key=takeFirst)
-                else:
-                    random.shuffle(results)
-                    output = results[0:int(listfilter.get("list"))]
-                    output.sort(key=takeFirst)
-
-                if len(output) > 0:
-                    count = 1
-                    print("\n\nMatches found: \n")
-                    for i in output:
-                        print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7].split()[1], i[5], i[6]))
-                        count += 1
-
-                    try:
-                        while True:
-                            prompt = input("\n||| Enter the corresponding number to play song, 'R' to play all at random, or 'Q' to exit: ").lower().strip()
-                            if prompt == "r":
-                                output_copy = list(output)
-                                random.shuffle(output_copy)
-                                for i in range(0, len(output_copy)):
-                                    playsong(output_copy, i, playvideo=playvideo)
-                            elif prompt != "q":
-                                playsong(output,(int(prompt) - 1) % len(output), playvideo=playvideo)
-                            else:
-                                break
-                    except:
-                        continue
-            except:
-                print("\n||| Invalid syntax or no results found.")
-                continue
-
-        elif selectedmode[0] == "p":
-            playlists = get_playlists()
-            print("\n\nPLAYLIST MODE (Work in Progress):")
-            for i, j in playlists.items():
-                print("[{}] {}".format(
-                    i,
-                    j["playlist_name"]
-                ))
-            try:
-                selectedplaylist = playlists[input("\n\n||| Input the ID of the playlist to play: ").strip().lower()]
-                loadedresults = []
-                for i in selectedplaylist["song_ids"]:
-                    for j in songlist:
-                        if i == j[16]:
-                            loadedresults.append(j)
-
-                print("\n\n{}".format(selectedplaylist["playlist_name"].upper()))
-                
-                count = 0
-                for i in loadedresults:
-                    count += 1
-                    print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7].split()[1], i[5], i[6]))
-
-                playlist_shuffle = input("\n\n||| Shuffle playlist? (Y/N): ").strip().lower() == "y"
-                playlist_loop = input("||| Loop playlist? (Y/N): ").strip().lower() == "y"
-
                 while True:
-                    if playlist_shuffle:
-                        random.shuffle(loadedresults)
-                    for i in range(0, len(loadedresults)):
-                        playsong(loadedresults, i, playvideo=playvideo)
-                    if not playlist_loop:
-                        break
+                    prompt = input("\n||| Enter the corresponding number to play song, 'R' to play all at random, or 'Q' to exit: ").lower().strip()
+                    match prompt:
+                        case "r":
+                            output_copy = list(output)
+                            random.shuffle(output_copy)
+                            for i in range(0, len(output_copy)):
+                                play_song(output_copy[i])
+                        case "q":
+                            break
+                        case _:
+                            play_song(output[(int(prompt) - 1) % len(output)])
             except:
                 pass
-        else:
-            break
+    except:
+        print("\n||| Invalid syntax or no results found.")
+    
+def begin_playlist_mode():
+    playlists = get_playlists()
+    print("\n\nPLAYLIST MODE (Work in Progress):")
 
+    for i, j in playlists.items():
+        print("[{}] {}".format(i, j["playlist_name"]))
 
+    try:
+        selected_playlist = playlists[input("\n\n||| Input the ID of the playlist to play: ").strip().lower()]
+        loaded_results = []
+        for i in selected_playlist["song_ids"]:
+            for j in song_list:
+                if i == j[16]:
+                    loaded_results.append(j)
+
+        print("\n\n{}".format(selected_playlist["playlist_name"].upper()))
+        
+        count = 0
+        for i in loaded_results:
+            count += 1
+            print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7].split()[1], i[5], i[6]))
+
+        playlist_shuffle = input("\n\n||| Shuffle playlist? (Y/N): ").strip().lower() == "y"
+        playlist_loop = input("||| Loop playlist? (Y/N): ").strip().lower() == "y"
+
+        while True:
+            if playlist_shuffle:
+                random.shuffle(loaded_results)
+            for i in range(0, len(loaded_results)):
+                play_song(loaded_results[i])
+            if not playlist_loop:
+                break
+    except:
+        pass
+
+def main():
+    selected_mode = input("\n||| Enter 'S' (search mode), 'R' (random song), 'L' (random list), or 'P' (playlist)\n||| Add 'V' to the end to play video instead of audio: ").lower().strip()
+    global play_video
+    play_video = len(selected_mode) > 1 and selected_mode[1] == "v"
+
+    while True:
+        match selected_mode[0]:
+            case "s":
+                begin_search_mode()
+            case "r":
+                begin_random_mode()
+            case "l":
+                begin_list_mode()
+            case "p":
+                begin_playlist_mode()
+            case _:
+                break
 
 # Driver code
-songlist = main_init()
+song_list = main_init()
+play_video = False
 while True:
-    main(songlist)
+    main()

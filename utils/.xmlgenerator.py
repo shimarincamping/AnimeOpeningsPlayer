@@ -25,7 +25,7 @@ print("""<?xml version="1.0" encoding="UTF-8" ?>
 				<user_total_dropped>0</user_total_dropped>
 				<user_total_plantowatch>0</user_total_plantowatch>
                         </myinfo>""")
-for i in ids:
+for i in set(ids):
     print("""				<anime>
 					<series_animedb_id>{}</series_animedb_id>
 					<my_status>{}</my_status>
