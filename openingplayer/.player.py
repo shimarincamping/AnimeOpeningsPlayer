@@ -45,7 +45,7 @@ def get_mpv_title(id, anime_name):
     return cmd_sanitise("[#{}] {}".format(id, anime_name))
 
 def get_window_title(id, anime_name, op_number, song_name, artist_name):
-    return cmd_sanitise("[#{}] {} OP{} - '{}' by {}".format(id, anime_name, op_number.split()[1], song_name, artist_name))
+    return cmd_sanitise("[#{}] {} OP{} - '{}' by {}".format(id, anime_name, op_number[8:], song_name, artist_name))
 
 def stream_mp3(selected_audio, loudnorm_I=-12, loudnorm_TP=-0.5):
     os.system('cmd /c "mpv --force-window --no-border --force-media-title=^"{}^" --title=^"{}^" --af=loudnorm=I={}:TP={} --osd-playing-msg="\\n${{media-title}}" --osd-playing-msg-duration=3600000 --osd-font-size=30 --osd-level=2 --osd-fractions --loop-file=no {}"'.format(
@@ -147,7 +147,7 @@ def get_search_results(query):
     for i in song_list:
         for j in [alphnum(x.lower()) for x in [i[2], i[3], i[5], i[6]] + ast.literal_eval(i[-3])]:
             if query in j:
-                print("[{}] {} OP{} – \"{}\" by {}".format(len(results) + 1, i[2], i[7].split()[1], i[5], i[6]))
+                print("[{}] {} OP{} – \"{}\" by {}".format(len(results) + 1, i[2], i[7][8:], i[5], i[6]))
                 results.append(i)
                 break
     return results
@@ -225,7 +225,7 @@ def begin_list_mode():
             count = 1
             print("\n\nMatches found: \n")
             for i in output:
-                print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7].split()[1], i[5], i[6]))
+                print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7][8:], i[5], i[6]))
                 count += 1
 
             try:
@@ -266,7 +266,7 @@ def begin_playlist_mode():
         count = 0
         for i in loaded_results:
             count += 1
-            print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7].split()[1], i[5], i[6]))
+            print("[{}] {} OP{} – \"{}\" by {}".format(count, i[2], i[7][8:], i[5], i[6]))
 
         playlist_shuffle = input("\n\n||| Shuffle playlist? (Y/N): ").strip().lower() == "y"
         playlist_loop = input("||| Loop playlist? (Y/N): ").strip().lower() == "y"
