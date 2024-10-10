@@ -13,7 +13,7 @@ cmd_replace_dict = {
     ">" : "^^^>"
 }
 
-servers = ["nl.catbox.video", "vhdist1.catbox.video", "ladist1.catbox.video"]
+servers = ["naedist.animemusicquiz.com", "nawdist.animemusicquiz.com", "eudist.animemusicquiz.com"]
 best_server = ""
 
 def check_connection():
@@ -21,7 +21,7 @@ def check_connection():
     print("""
           >>> Checking connection...
           
-                AVG PING TO CATBOX SERVERS
+                AVERAGE PING TO FILE SERVERS
                 =============================""")
     for i in servers:
         try:
@@ -52,7 +52,7 @@ def stream_mp3(selected_audio, loudnorm_I=-12, loudnorm_TP=-0.5):
         get_mpv_title(selected_audio[0], selected_audio[2]),
         get_window_title(selected_audio[0], selected_audio[2], selected_audio[7], selected_audio[5], selected_audio[6]),
         loudnorm_I, loudnorm_TP,
-        selected_audio[-7].replace("ladist1.catbox.video", best_server)
+        selected_audio[-7].replace("naedist.animemusicquiz.com", best_server)
     ))
 
 def stream_webm(selected_audio, loudnorm_I=-12, loudnorm_TP=-0.5):
@@ -60,7 +60,7 @@ def stream_webm(selected_audio, loudnorm_I=-12, loudnorm_TP=-0.5):
         get_mpv_title(selected_audio[0], selected_audio[2]),
         get_window_title(selected_audio[0], selected_audio[2], selected_audio[7], selected_audio[5], selected_audio[6]),
         loudnorm_I, loudnorm_TP,
-        selected_audio[-8].replace("ladist1.catbox.video", best_server)
+        selected_audio[-8].replace("naedist.animemusicquiz.com", best_server)
     ))
 
 def play_song(selected_audio):
@@ -136,7 +136,7 @@ def main_init():
     """)
 
     global best_server
-    best_server = check_connection() if input("||| Check server connections? (Y/N): ").strip().lower() == "y" else servers[0]
+    best_server = check_connection() if input("||| Check server connections? (Y/N): ").strip().lower() == "y" else servers[-1]
     print()
 
     return song_list
