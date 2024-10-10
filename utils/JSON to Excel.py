@@ -19,12 +19,12 @@ for z in files_list:
         output += "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t\t{}\t\t{}\t\t\t\t".format(i["anime"]["romaji"], i["anime"]["english"], i["difficulty"], i["name"], i["artist"], i["type"], i["vintage"], i["animeType"][0].upper() + i["animeType"][1:], ', '.join(i["genre"]), i["startSample"])
 
         if "720" in i["urls"]["catbox"].keys():
-            output += "https://ladist1.catbox.video/{}\t".format(i["urls"]["catbox"]["720"])
+            output += "https://naedist.animemusicquiz.com/{}\t".format(i["urls"]["catbox"]["720"])
         elif "480" in i["urls"]["catbox"].keys():
-            output += "https://ladist1.catbox.video/{}\t".format(i["urls"]["catbox"]["480"])
+            output += "https://naedist.animemusicquiz.com/{}\t".format(i["urls"]["catbox"]["480"])
 
         if "0" in i["urls"]["catbox"].keys():
-            output += "https://ladist1.catbox.video/{}\t".format(i["urls"]["catbox"]["0"])
+            output += "https://naedist.animemusicquiz.com/{}\t".format(i["urls"]["catbox"]["0"])
         else:
             output += "\t"
 

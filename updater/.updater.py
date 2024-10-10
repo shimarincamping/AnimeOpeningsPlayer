@@ -16,11 +16,11 @@ for h in json_list:
             i["anime"]["english"] = ""
         excel_line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t\t{}\t\t{}\t\t\t\t".format(i["anime"]["romaji"], i["anime"]["english"], i["difficulty"], i["name"], i["artist"], i["type"], i["vintage"], i["animeType"][0].upper() + i["animeType"][1:], ', '.join(i["genre"]), i["startSample"])
         if "720" in i["urls"]["catbox"].keys():
-            excel_line += "https://ladist1.catbox.video/{}\t".format(i["urls"]["catbox"]["720"])
+            excel_line += "https://naedist.animemusicquiz.com/{}\t".format(i["urls"]["catbox"]["720"])
         elif "480" in i["urls"]["catbox"].keys():
-            excel_line += "https://ladist1.catbox.video/{}\t".format(i["urls"]["catbox"]["480"])
+            excel_line += "https://naedist.animemusicquiz.com/{}\t".format(i["urls"]["catbox"]["480"])
         if "0" in i["urls"]["catbox"].keys():
-            excel_line += "https://ladist1.catbox.video/{}\t".format(i["urls"]["catbox"]["0"])
+            excel_line += "https://naedist.animemusicquiz.com/{}\t".format(i["urls"]["catbox"]["0"])
         else:
             excel_line += "\t"
         excel_line += "{}\t{}\t{}\t{}\n".format("https://myanimelist.net/anime/" + str(i["siteIds"]["malId"]), "https://anilist.co/anime/" + str(i["siteIds"]["aniListId"]), "https://www.animenewsnetwork.com/encyclopedia/anime.php?id=" + str(i["siteIds"]["annId"]), i["altAnswers"])
@@ -118,7 +118,7 @@ if (input("Proceed to file checking? (Y/N): ")).strip().lower() == "y":
     for i in current_data:
         if i[15] and i[15] not in file_list:
             discrepancy.append("   [!] File not found for entry #{} ({}) - mp3: {}".format(i[0].zfill(4), i[2], i[18]))
-            download_list.append(i[18].replace("ladist1.catbox.video", "nl.catbox.video"))
+            download_list.append(i[18].replace("naedist.animemusicquiz.com", "eudist.animemusicquiz.com"))
 
     if len(discrepancy) > 0:
         discrepancy = sorted(set(discrepancy))
